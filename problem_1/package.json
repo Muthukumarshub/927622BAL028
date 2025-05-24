@@ -1,0 +1,16 @@
+{
+  "name": "average-calculator-service",
+  "version": "1.0.0",
+  "description": "An HTTP microservice to calculate average of numbers from a third-party server.",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "keywords": [],
+  "author": "Your Name (or Gemini)",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "express": "^4.19.2"
+  }
+}
