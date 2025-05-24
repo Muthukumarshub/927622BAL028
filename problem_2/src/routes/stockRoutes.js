@@ -1,16 +1,9 @@
-// src/routes/stockRoutes.js
-
 const express = require("express");
 const stockDataService = require("../services/stockDataService");
 const aggregationService = require("../services/aggregationService");
 
 const router = express.Router();
 
-/**
- * GET /stocks/:ticker
- * Route for Average Stock Price in the last "m" minutes
- * Query Params: minutes=m (required), aggregation=average (required)
- */
 router.get("/stocks/:ticker", async (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
   const minutes = parseInt(req.query.minutes, 10);
@@ -33,7 +26,7 @@ router.get("/stocks/:ticker", async (req, res) => {
     const averagePrice = aggregationService.calculateAverageStockPrice(priceHistory);
 
     res.json({
-      averageStockPrice: parseFloat(averagePrice.toFixed(6)), // Format as per example
+      averageStockPrice: parseFloat(averagePrice.toFixed(6)),
       priceHistory: priceHistory.map(p => ({
         price: p.price,
         lastUpdatedAt: p.lastUpdatedAt
@@ -45,14 +38,9 @@ router.get("/stocks/:ticker", async (req, res) => {
   }
 });
 
-/**
- * GET /stockcorrelation
- * Route for Correlation of Price Movement between 2 stocks in the last "m" minutes.
- * Query Params: minutes=m (required), ticker=TICKER1 (required), ticker=TICKER2 (required)
- */
 router.get("/stockcorrelation", async (req, res) => {
   const minutes = parseInt(req.query.minutes, 10);
-  const tickers = req.query.ticker; // This will be an array if multiple ticker params exist
+  const tickers = req.query.ticker;
 
   if (isNaN(minutes) || minutes <= 0) {
     return res.status(400).json({ error: "Invalid 'minutes' parameter. Must be a positive number." });

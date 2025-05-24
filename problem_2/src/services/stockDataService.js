@@ -1,39 +1,25 @@
-// src/services/stockDataService.js
-
 const axios = require("axios");
 const { TEST_SERVER_BASE_URL, FETCH_TIMEOUT, CACHE_EXPIRY_SECONDS, AUTH_TOKEN } = require("../utils/constants");
 
-// In-memory cache for stock price history.
-// Key: "ticker_minutes" (e.g., "NVDA_60")
-// Value: { priceHistory: Array<{ price: number, lastUpdatedAt: string }>, fetchedAt: Date }
 const stockPriceCache = new Map();
 
-/**
- * Fetches price history for a given ticker and duration from the external API,
- * using an in-memory cache to reduce redundant calls.
- * @param {string} ticker - The stock ticker symbol (e.g., "NVDA").
- * @param {number} minutes - The number of minutes to fetch history for.
- * @returns {Promise<Array<{ price: number, lastUpdatedAt: string }>>} Price history.
- */
 async function fetchPriceHistory(ticker, minutes) {
   const cacheKey = `${ticker}_${minutes}`;
   const now = new Date();
 
-  // 1. Check Cache
   if (stockPriceCache.has(cacheKey)) {
     const cachedData = stockPriceCache.get(cacheKey);
-    const timeElapsed = (now.getTime() - cachedData.fetchedAt.getTime()) / 1000; // in seconds
+    const timeElapsed = (now.getTime() - cachedData.fetchedAt.getTime()) / 1000;
 
     if (timeElapsed < CACHE_EXPIRY_SECONDS) {
       console.log(`[Cache Hit] Using cached data for ${cacheKey}.`);
       return cachedData.priceHistory;
     } else {
       console.log(`[Cache Stale] Cache for ${cacheKey} expired. Refetching.`);
-      stockPriceCache.delete(cacheKey); // Clear stale cache entry
+      stockPriceCache.delete(cacheKey);
     }
   }
 
-  // 2. Fetch from External API
   console.log(`[Fetching] Fetching data for ${cacheKey} from external API.`);
   const apiUrl = `${TEST_SERVER_BASE_URL}/stocks/${ticker}?minutes=${minutes}`;
 
@@ -45,19 +31,15 @@ async function fetchPriceHistory(ticker, minutes) {
       },
     });
 
-    // The API response is an array of price objects.
-    const priceHistory = response.data; // Assuming response.data is directly the array as per example
+    const priceHistory = response.data;
 
-    // Ensure priceHistory is an array and each item has price and lastUpdatedAt
     if (!Array.isArray(priceHistory) || priceHistory.some(item => typeof item.price !== 'number' || !item.lastUpdatedAt)) {
       console.warn(`Invalid data structure received from ${apiUrl}:`, priceHistory);
       return [];
     }
 
-    // Sort the price history by timestamp in ascending order for consistent processing
     priceHistory.sort((a, b) => new Date(a.lastUpdatedAt).getTime() - new Date(b.lastUpdatedAt).getTime());
 
-    // 3. Store in Cache
     stockPriceCache.set(cacheKey, {
       priceHistory: priceHistory,
       fetchedAt: now,
@@ -77,7 +59,7 @@ async function fetchPriceHistory(ticker, minutes) {
     } else {
       console.error('Error setting up request:', error.message);
     }
-    return []; // Return empty array on error
+    return [];
   }
 }
 

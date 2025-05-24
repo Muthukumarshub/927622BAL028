@@ -7,7 +7,7 @@
     "start": "node src/app.js"
   },
   "keywords": ["stock", "price", "average", "correlation", "microservice", "api"],
-  "author": "Gemini",
+  "author": "Muthukumarshub (927622BAL028)",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.6.8",
